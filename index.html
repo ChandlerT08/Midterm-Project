@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Untitled Game</title>
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="style.css" defer>
+</head>
+<body>
+    <div id="sceneDiv">
+        <h1 id="sceneHeader">Scene I</h1>
+        <p id="sceneDescription">You are in the first scene</p>
+        <button id="proceed">Proceed</button>
+        <button id="giveUp">Give Up</button>
+    </div>
+
+    <div id="bossDiv" hidden>
+        <p id="bossName">Boss</p>
+        <progress id="bossHealth" value="100" max="100" min="0"></progress>
+    </div>
+
+    <div id="playerDiv" hidden>
+        <p id="playerName">Player</p>
+        <progress id="playerRepose" value="100" max="100" min="0"></progress>
+    </div>
+    
+</body>
+</html>
