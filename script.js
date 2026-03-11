@@ -94,17 +94,16 @@ function fight(num){
     const bossName = document.getElementById("bossName");
     const bossRepose = document.getElementById("bossRepose");
     const playerRepose = document.getElementById("playerRepose");
+    const keyParagraph = document.getElementById("keyParagraph");
     const keys = ['w', 'a', 's', 'd'];
     let attackNum = 0
+    let timeInterval;
+    let parries = 0; 
     switch (num){
         case 0:
             bossName.textContent = "Spine Hydra";
 
-            let timeInterval = setInterval(attack, 1000);
-            
-            if(attackNum == 5){
-                clearInterval(timeInterval);
-            }
+            timeInterval = setInterval(attack, 1000); 
 
             break;
         case 1:
@@ -117,6 +116,31 @@ function fight(num){
 
     function attack(){
         bossName.textContent += " attacks: " + attackNum;
-        attackNum++;
+        keyToHit = Math.floor(Math.random() * 4)
+        switch (num){
+            case 0:
+                if(attackNum == 5){
+                    clearInterval(timeInterval);
+                    parries = 0;
+                }
+
+                document.body.addEventListener("keydown", function(inputKey){
+                    if(inputKey.key == keys[keyToHit]){
+                        parries += 1;
+                        console.log(parries);
+                    }else{
+
+                    }
+                })
+                keyParagraph.textContent = keys[keyToHit] + "Attacks Parried: " + parries;
+                
+                attackNum++;
+                
+                break;
+            case 1:
+                break;
+            case 2:
+                break;
+        }
     }
 }
