@@ -56,8 +56,8 @@ function storyScene() {
 
 function fightScene() {
     sceneDiv.setAttribute('hidden', true);
-    bossDiv.removeAttribute('hidden');
-    playerDiv.removeAttribute('hidden');
+    document.getElementById("fightContainer").removeAttribute('hidden');
+    document.getElementById("keyDisplay").style.display = "flex";
 
     // call the fight function with the fight number
     fight(fightNum);
@@ -94,7 +94,8 @@ function fight(num){
     const bossName = document.getElementById("bossName");
     const bossRepose = document.getElementById("bossRepose");
     const playerRepose = document.getElementById("playerRepose");
-    const keyParagraph = document.getElementById("keyParagraph");
+    const keyBox = document.getElementById("keyBox");
+    const parryCount = document.getElementById("parryCount");
     const keys = ['w', 'a', 's', 'd'];
     let attackNum = 0
     let timeInterval;
@@ -103,7 +104,7 @@ function fight(num){
         case 0:
             bossName.textContent = "Spine Hydra";
 
-            timeInterval = setInterval(attack, 1000); 
+            timeInterval = setInterval(attack, 1000);
 
             break;
         case 1:
@@ -115,32 +116,41 @@ function fight(num){
     }
 
     function attack(){
-        bossName.textContent += " attacks: " + attackNum;
+        console.log("Attack")
         keyToHit = Math.floor(Math.random() * 4)
+        let parried = false;
+
         switch (num){
             case 0:
-                if(attackNum == 5){
-                    clearInterval(timeInterval);
-                    parries = 0;
-                }
+                window.addEventListener("keydown", parry)
 
-                document.body.addEventListener("keydown", function(inputKey){
-                    if(inputKey.key == keys[keyToHit]){
-                        parries += 1;
-                        console.log(parries);
-                    }else{
-
-                    }
-                })
-                keyParagraph.textContent = keys[keyToHit] + "Attacks Parried: " + parries;
-                
+                keyBox.textContent = keys[keyToHit];
+                parryCount.textContent = "Attacks Parried: " + parries;
                 attackNum++;
                 
+                if(attackNum == 6){
+                    keyBox.textContent = keys[keyToHit];
+                    parryCount.textContent = "Attacks Parried: " + parries;
+                    clearInterval(timeInterval);
+                    document.getElementById("keyBox").style.display = 'none';
+                    bossRepose.value -= (parries * 10)
+                    playerRepose.value -= ((5-parries) * 8)
+                    parries = 0;
+                }
                 break;
             case 1:
                 break;
             case 2:
                 break;
+        }
+
+        function parry(inputKey){
+            if(inputKey.key == keys[keyToHit] && !inputKey.repeat && !parried){
+                parried = true;
+                parries++;
+                console.log(parries);
+                window.removeEventListener("keydown", parry);
+            }
         }
     }
 }
