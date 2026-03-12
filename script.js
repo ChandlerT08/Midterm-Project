@@ -93,7 +93,7 @@ giveUpButton.addEventListener("click", function(){
 })
 
 //Fight function
-function fight(num){
+async function fight(num){
     const bossName = document.getElementById("bossName");
     const bossRepose = document.getElementById("bossRepose");
     const playerRepose = document.getElementById("playerRepose");
@@ -106,8 +106,16 @@ function fight(num){
     switch (num){
         case 0:
             bossName.textContent = "Spine Hydra";
+            let totalAttacks = 5;
 
-            timeInterval = setInterval(attack, 1000);
+            for(let i = 0; i < totalAttacks; i++){
+                let keyToHit = Math.floor(Math.random() * 4);
+                let success = await attack(keys[keyToHit], 1000)
+
+                if(success){
+                    parries++;
+                }
+            }
 
             break;
         case 1:
@@ -148,6 +156,7 @@ function fight(num){
                     keyBox.textContent = keys[keyToHit];
                     parryCount.textContent = "Attacks Parried: " + parries;
                     clearInterval(timeInterval);
+                    timeInterval = undefined;
                     document.getElementById("keyBox").style.display = 'none';
                     bossRepose.value -= (parries * 10)
                     playerRepose.value -= ((5-parries) * 8)
