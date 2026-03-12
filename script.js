@@ -59,6 +59,9 @@ function fightScene() {
     document.getElementById("fightContainer").removeAttribute('hidden');
     document.getElementById("keyDisplay").style.display = "flex";
 
+    bossDiv.removeAttribute('hidden');
+    playerDiv.removeAttribute('hidden');
+
     // call the fight function with the fight number
     fight(fightNum);
     fightNum++;
@@ -115,10 +118,22 @@ function fight(num){
             break;
     }
 
+    // Parry stuff
+    let parried = false;
+    function parry(inputKey){
+        if(inputKey.key == keys[keyToHit] && !inputKey.repeat && !parried){
+            parried = true;
+            parries++;
+            console.log(parries);
+            return;
+        }
+    }
+
     function attack(){
         console.log("Attack")
+        window.removeEventListener("keydown", parry);
+        parried = false;
         keyToHit = Math.floor(Math.random() * 4)
-        let parried = false;
 
         switch (num){
             case 0:
@@ -128,6 +143,7 @@ function fight(num){
                 parryCount.textContent = "Attacks Parried: " + parries;
                 attackNum++;
                 
+
                 if(attackNum == 6){
                     keyBox.textContent = keys[keyToHit];
                     parryCount.textContent = "Attacks Parried: " + parries;
@@ -142,15 +158,6 @@ function fight(num){
                 break;
             case 2:
                 break;
-        }
-
-        function parry(inputKey){
-            if(inputKey.key == keys[keyToHit] && !inputKey.repeat && !parried){
-                parried = true;
-                parries++;
-                console.log(parries);
-                window.removeEventListener("keydown", parry);
-            }
         }
     }
 }

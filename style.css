@@ -23,6 +23,11 @@ body {
     justify-content: space-between;
     padding: 10px 0;
     box-sizing: border-box;
+    pointer-events: none;
+}
+
+#fightContainer:not([hidden]) {
+    pointer-events: all;
 }
 
 /* Boss div at the top */
