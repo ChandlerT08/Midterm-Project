@@ -10,8 +10,11 @@ const giveUpButton = document.getElementById("giveUp");
 // scene details
 let scenes = {
     0: "story",
-    1: "story",
+    1: "defeat",
     2: "fight",
+    3: "story",
+    4: "defeat",
+    5: "fight"
 }
 
 let sceneHeader = [
@@ -42,7 +45,7 @@ function storyScene() {
     }
 
     // if a defeat scene hide both buttons
-    if(storyNum % 2 == 1){
+    if(scenes[storyNum] == "defeat"){
         proceedButton.setAttribute('hidden', true);
         giveUpButton.setAttribute('hidden', true);
     }
@@ -69,6 +72,9 @@ function fightScene() {
 
 function sceneSelector(sceneType) {
     switch (sceneType){
+        case "defeat":
+            storyScene(storyNum);
+            break;
         case "story":
             storyScene(storyNum);
             break;
@@ -94,29 +100,59 @@ giveUpButton.addEventListener("click", function(){
 
 //Fight function
 async function fight(num){
+    //Define constants
     const bossName = document.getElementById("bossName");
     const bossRepose = document.getElementById("bossRepose");
     const playerRepose = document.getElementById("playerRepose");
-    const keyBox = document.getElementById("keyBox");
     const parryCount = document.getElementById("parryCount");
     const keys = ['w', 'a', 's', 'd'];
-    let attackNum = 0
-    let timeInterval;
     let parries = 0; 
+
+    //initiate switch-case based on boss you are fighting
     switch (num){
         case 0:
             bossName.textContent = "Spine Hydra";
             let totalAttacks = 5;
+            let comboNumber = 0;
+            while(bossRepose.value > 0 && playerRepose.value > 0){
+                parries = 0;
 
-            for(let i = 0; i < totalAttacks; i++){
-                let keyToHit = Math.floor(Math.random() * 4);
-                let success = await attack(keys[keyToHit], 1000)
+                //combo of 5 attacks
+                for(let i = 0; i < totalAttacks; i++){
+                    let keyToHit = Math.floor(Math.random() * 4);
+                    let success = await attack(keys[keyToHit], 1000)
 
-                if(success){
-                    parries++;
+                    if(success){
+                        parries++;
+                    }
+
+                    parryCount.textContent = "Attacks Parried: " + parries;
                 }
+
+                //Deals the damage based on results of the combo
+                resolveFight(parries, totalAttacks, bossRepose, playerRepose);
+                
+                //Counts the number of combos
+                comboNumber++;
+                console.log("Combo Number: " + comboNumber);
             }
 
+            // Changes Display based on result
+            document.getElementById("keyBox").style.display = 'none';
+            document.getElementById("parryCount").style.display = 'none';
+
+            if(bossRepose.value <= 0){
+                storyNum++;
+                sceneSelector(scenes[storyNum]);
+                document.getElementById("sceneDescription").textContent = "Congrats! You beat the first boss, press continue to move to the next scene";
+            }else{
+                storyNum += 2;
+                sceneSelector(scenes[storyNum]);
+                document.getElementById("sceneDescription").removeAttribute('hidden');
+                document.getElementById("sceneDescription").textContent = "YOU DIED";
+            }
+
+            
             break;
         case 1:
             bossName.textContent = "The Crawling City";
@@ -126,47 +162,43 @@ async function fight(num){
             break;
     }
 
-    // Parry stuff
-    let parried = false;
-    function parry(inputKey){
-        if(inputKey.key == keys[keyToHit] && !inputKey.repeat && !parried){
-            parried = true;
-            parries++;
-            console.log(parries);
-            return;
-        }
+    function attack(keyToPress, timeLimit){
+        // Define constants
+        const keyBox = document.getElementById("keyBox");
+        keyBox.textContent = keyToPress;
+
+        
+        return new Promise(resolve => {
+            let finished = false;
+            
+            function keyPressed(key){
+                if(finished){
+                    return;
+                }
+                if(key.key === keyToPress && !key.repeat){
+                    finished = true;
+                    window.removeEventListener("keydown", keyPressed);
+                    resolve(true); // You parried successfully
+                }
+            }
+
+            window.addEventListener("keydown", keyPressed);
+
+            setTimeout(() => {
+                if(finished){
+                    return;
+                }
+
+                finished = true;
+                window.removeEventListener("keydown", keyPressed);
+                resolve(false); // you missed the parry
+
+            }, timeLimit);
+        });
     }
 
-    function attack(){
-        console.log("Attack")
-        window.removeEventListener("keydown", parry);
-        parried = false;
-        keyToHit = Math.floor(Math.random() * 4)
-
-        switch (num){
-            case 0:
-                window.addEventListener("keydown", parry)
-
-                keyBox.textContent = keys[keyToHit];
-                parryCount.textContent = "Attacks Parried: " + parries;
-                attackNum++;
-                
-
-                if(attackNum == 6){
-                    keyBox.textContent = keys[keyToHit];
-                    parryCount.textContent = "Attacks Parried: " + parries;
-                    clearInterval(timeInterval);
-                    timeInterval = undefined;
-                    document.getElementById("keyBox").style.display = 'none';
-                    bossRepose.value -= (parries * 10)
-                    playerRepose.value -= ((5-parries) * 8)
-                    parries = 0;
-                }
-                break;
-            case 1:
-                break;
-            case 2:
-                break;
-        }
+    function resolveFight(parries, totalAttacks, bossRepose, playerRepose){
+        bossRepose.value -= (parries * 10);
+        playerRepose.value -= ((totalAttacks - parries) * 8);
     }
 }
