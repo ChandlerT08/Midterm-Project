@@ -1,126 +1,463 @@
-/* General body styling */
-body {
-    margin: 0;
-    padding: 0;
-    height: 100vh;                 /* full viewport height */
-    font-family: Arial, sans-serif;
-    background-color: #1e1e1e;
-    color: #fff;
-    position: relative;            /* for absolute positioning of boss/player */
-    overflow: hidden;
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+
+:root {
+    --blood:     #8b1a1a;
+    --blood-dim: #5a1010;
+    --gold:      #c9a84c;
+    --gold-dim:  #8a6f2e;
+    --ash:       #e8e0d0;
+    --ash-dim:   #9e9488;
+    --dark:      #0d0b0b;
+    --dark-mid:  #1a1614;
+    --dark-card: rgba(10, 8, 8, 0.82);
+    --glow-red:  rgba(139, 26, 26, 0.55);
+    --glow-blue: rgba(60, 90, 160, 0.45);
 }
 
-/* Fight container: full screen, vertical flex column */
-#fightContainer {
-    position: absolute;
-    top: 0;
-    left: 0;
+/* ── Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    height: 100vh;
+    overflow: hidden;
+    background-color: var(--dark);
+    color: var(--ash);
+    font-family: 'Crimson Text', Georgia, serif;
+    font-size: 18px;
+    cursor: default;
+}
+
+/* ── Background image ── */
+#sceneBg {
+    position: fixed;
+    inset: 0;
     width: 100%;
     height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 0;
-    box-sizing: border-box;
+    object-fit: cover;
+    z-index: 0;
+    opacity: 0.35;
+    transition: opacity 1.2s ease, src 0s;
+    filter: saturate(0.7) brightness(0.6);
+}
+
+/* Vignette overlay — sits above bg, below content */
+body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 1;
+    background: radial-gradient(ellipse at center, transparent 35%, rgba(0,0,0,0.75) 100%);
     pointer-events: none;
 }
 
-#fightContainer:not([hidden]) {
-    pointer-events: all;
-}
-
-/* Boss div at the top */
-#bossDiv {
-    text-align: center;
-    background-color: rgba(255, 0, 0, 0.2);
-    padding: 10px 20px;
-    border-radius: 8px;
-}
-
-#bossHealth {
-    width: 200px;
-    height: 20px;
-}
-
-/* Player div at the bottom */
-#playerDiv {
-    text-align: center;
-    background-color: rgba(0, 0, 255, 0.2);
-    padding: 10px 20px;
-    border-radius: 8px;
-}
-
-#playerRepose {
-    width: 200px;
-    height: 20px;
-}
-
-/* Scene div centered */
+/* ── Scene div (story screens) ── */
 #sceneDiv {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    z-index: 10;
     text-align: center;
+    width: min(680px, 90vw);
+    padding: 48px 52px;
+    background: var(--dark-card);
+    border: 1px solid var(--gold-dim);
+    border-top: 2px solid var(--gold);
+    box-shadow: 0 0 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(201,168,76,0.15);
 }
 
+/* Corner ornaments */
+#sceneDiv::before, #sceneDiv::after {
+    content: '✦';
+    position: absolute;
+    color: var(--gold-dim);
+    font-size: 10px;
+    top: 8px;
+}
+#sceneDiv::before { left: 12px; }
+#sceneDiv::after  { right: 12px; }
 
-/* Key display container - hidden by default, shown during fight */
+#sceneHeader {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-shadow: 0 0 24px rgba(201,168,76,0.4);
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--gold-dim);
+}
+
+#sceneDescription {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: var(--ash);
+    max-width: 520px;
+    margin: 0 auto 32px;
+    font-style: italic;
+}
+
+#nameInputDiv {
+    margin: 20px 0;
+}
+
+#nameInputDiv label {
+    display: block;
+    font-family: 'Cinzel', serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 8px;
+}
+
+#nameInput {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--gold-dim);
+    border-bottom: 2px solid var(--gold);
+    color: var(--ash);
+    font-family: 'Crimson Text', serif;
+    font-size: 1.1rem;
+    padding: 10px 16px;
+    width: 260px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+#nameInput:focus {
+    border-color: var(--gold);
+    border-bottom-color: var(--gold);
+}
+
+/* ── Buttons ── */
+button {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    padding: 13px 36px;
+    transition: all 0.2s ease;
+    position: relative;
+    margin: 6px 8px 0;
+}
+
+#proceed {
+    background: var(--blood);
+    color: var(--ash);
+    border: 1px solid var(--blood-dim);
+    box-shadow: 0 4px 20px rgba(139,26,26,0.4);
+}
+#proceed:hover {
+    background: #a82020;
+    box-shadow: 0 4px 28px rgba(139,26,26,0.7);
+    transform: translateY(-1px);
+}
+#proceed:active { transform: translateY(0); }
+
+#giveUp {
+    background: transparent;
+    color: var(--ash-dim);
+    border: 1px solid #3a3330;
+}
+#giveUp:hover {
+    color: var(--ash);
+    border-color: var(--ash-dim);
+    background: rgba(255,255,255,0.04);
+}
+
+/* ── Fight container ── */
+#fightContainer {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    pointer-events: none;
+}
+#fightContainer:not([hidden]) { pointer-events: all; }
+
+#relicSelectionDiv {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 20;
+    text-align: center;
+    width: min(680px, 90vw);
+    padding: 40px 48px;
+    background: var(--dark-card);
+    border: 1px solid var(--gold-dim);
+    border-top: 2px solid var(--gold);
+    box-shadow: 0 0 60px rgba(0,0,0,0.8);
+}
+
+#relicSelectionHeader {
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+}
+
+#relicSelectionSubtitle {
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    color: var(--ash-dim);
+    margin-bottom: 28px;
+}
+
+#relicOptions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.relicCard {
+    width: 180px;
+    padding: 20px 16px;
+    background: rgba(20, 15, 15, 0.8);
+    border: 1px solid var(--gold-dim);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.relicCard:hover {
+    border-color: var(--gold);
+    background: rgba(139, 26, 26, 0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.5);
+}
+
+.relicName {
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+}
+
+.relicDesc {
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    color: var(--ash-dim);
+    line-height: 1.5;
+}
+
+#relicPanel {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 15;
+    background: var(--dark-card);
+    border: 1px solid var(--gold-dim);
+    padding: 12px 18px;
+    min-width: 180px;
+    cursor: pointer
+}
+
+#relicHeader {
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--gold-dim);
+}
+
+.relicItem {
+    font-family: 'Crimson Text', serif;
+    font-size: 0.95rem;
+    color: var(--ash);
+    margin: 4px 0;
+}
+
+#reset {
+    background: transparent;
+    color: var(--gold-dim);
+    border: 1px solid var(--gold-dim);
+    box-shadow: none;
+}
+
+#reset:hover {
+    background: rgba(201, 168, 76, 0.1);
+    color: var(--gold);
+    border-color: var(--gold);
+    box-shadow: 0 4px 20px rgba(201, 168, 76, 0.2);
+    transform: translateY(-1px);
+}
+
+/* ── Boss panel ── */
+#bossDiv {
+    text-align: center;
+    background: linear-gradient(180deg, rgba(80,10,10,0.6) 0%, rgba(10,8,8,0.5) 100%);
+    border: 1px solid rgba(139,26,26,0.4);
+    border-bottom: none;
+    padding: 16px 32px 0;
+    width: min(420px, 92vw);
+    position: relative;
+}
+
+#bossDiv::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 16px; right: 16px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--blood), transparent);
+}
+
+#bossName {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #c05050;
+    margin-bottom: 10px;
+}
+
+/* Health bars */
+progress {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 260px;
+    height: 10px;
+    border: none;
+    display: block;
+    margin: 0 auto 14px;
+}
+
+#bossRepose::-webkit-progress-bar        { background: rgba(255,255,255,0.06); }
+#bossRepose::-webkit-progress-value      { background: linear-gradient(90deg, var(--blood-dim), var(--blood)); box-shadow: 0 0 8px var(--glow-red); }
+#bossRepose::-moz-progress-bar          { background: linear-gradient(90deg, var(--blood-dim), var(--blood)); }
+
+#playerRepose::-webkit-progress-bar     { background: rgba(255,255,255,0.06); }
+#playerRepose::-webkit-progress-value   { background: linear-gradient(90deg, #1a3a7a, #3c5aa0); box-shadow: 0 0 8px var(--glow-blue); }
+#playerRepose::-moz-progress-bar        { background: linear-gradient(90deg, #1a3a7a, #3c5aa0); }
+
+/* Boss sprite */
+#bossSprite {
+    display: flex;
+    justify-content: center;
+    margin-top: 8px;
+    filter: drop-shadow(0 0 16px rgba(139,26,26,0.7));
+    position: relative;
+}
+#bossTooltip {
+    display: none;
+    position: absolute;
+    bottom: 105%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10, 8, 8, 0.92);
+    border: 1px solid var(--gold-dim);
+    color: var(--ash);
+    font-family: 'Crimson Text', serif;
+    font-style: italic;
+    font-size: 0.95rem;
+    padding: 10px 16px;
+    white-space: nowrap;
+    pointer-events: none;
+}
+#bossImage {
+    height: 200px;
+    width: auto;
+    image-rendering: pixelated;
+}
+
+/* ── Key display (center) ── */
 #keyDisplay {
     display: none;
     flex-direction: column;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
+    z-index: 20;
 }
 
-/* The key box */
 #keyBox {
-    width: 80px;
-    height: 80px;
-    border: 3px solid #fff;
-    border-radius: 10px;
+    width: 76px;
+    height: 76px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 2.5em;
-    font-weight: bold;
-    background-color: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
-    letter-spacing: 0;
-    min-width: 80px;
+    font-family: 'Cinzel', serif;
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--gold);
+    text-transform: uppercase;
+    background: rgba(10,8,8,0.85);
+    border: 2px solid var(--gold-dim);
+    box-shadow: 0 0 20px rgba(201,168,76,0.25), inset 0 0 12px rgba(0,0,0,0.6);
+    animation: pulse 1.4s ease-in-out infinite;
 }
 
-/* Parry count below the box */
-#parryCount {
-    font-size: 1.1em;
-    color: #ccc;
-    margin: 0;
+@keyframes pulse {
+    0%, 100% { box-shadow: 0 0 16px rgba(201,168,76,0.2), inset 0 0 12px rgba(0,0,0,0.6); }
+    50%       { box-shadow: 0 0 32px rgba(201,168,76,0.55), inset 0 0 12px rgba(0,0,0,0.6); }
 }
-/* Sprite containers */
-#bossSprite {
-    margin-top: 10px;
-    display: flex;
-    justify-content: center;
-    filter: drop-shadow(0 0 8px rgba(255, 69, 0, 0.6));
+
+#parryCount {
+    font-family: 'Cinzel', serif;
+    font-size: 0.78rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--ash-dim);
+}
+
+/* ── Player panel ── */
+#playerDiv {
+    text-align: center;
+    background: linear-gradient(0deg, rgba(20,30,60,0.6) 0%, rgba(10,8,8,0.5) 100%);
+    border: 1px solid rgba(60,90,160,0.35);
+    border-top: none;
+    padding: 0 32px 16px;
+    width: min(420px, 92vw);
+    position: relative;
+}
+
+#playerDiv::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 16px; right: 16px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #3c5aa0, transparent);
+}
+
+#playerName {
+    font-family: 'Cinzel', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: #5070b0;
+    margin-bottom: 10px;
+    margin-top: 14px;
 }
 
 #playerSprite {
-    margin-bottom: 10px;
     display: flex;
     justify-content: center;
-    filter: drop-shadow(0 0 8px rgba(100, 160, 255, 0.5));
+    margin-bottom: 8px;
+    filter: drop-shadow(0 0 12px rgba(60,90,200,0.55));
 }
-
-/* Scene header */
-#sceneHeader {
-    font-size: 2em;
-    margin-bottom: 10px; /* space between header and description */
-}
-
-/* Scene description */
-#sceneDescription {
-    font-size: 1.2em;
-    margin: 0 20px;
-    max-width: 600px;
+#playerImage {
+    height: 130px;
+    width: auto;
+    image-rendering: pixelated;
 }
